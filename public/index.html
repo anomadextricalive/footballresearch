@@ -130,6 +130,15 @@
                   <li><strong>Peak</strong>: title strength and highest finishes</li>
                   <li><strong>Recent Form</strong>: latest season performance trend</li>
                 </ul>
+                <p class="mt-3">Batch comparison score (relative, out of 10):</p>
+                <ul class="mt-2 list-disc space-y-1 pl-5">
+                  <li><strong>Performance</strong>: 0-4.5</li>
+                  <li><strong>League Level</strong>: 0-1.5</li>
+                  <li><strong>Longevity</strong>: 0-1.5</li>
+                  <li><strong>Squad Value</strong>: 0-2.0</li>
+                  <li><strong>Squad Momentum (Value Δ%)</strong>: 0-2.0</li>
+                </ul>
+                <p class="mt-2 text-xs">europe/ucl is shown as info only (not weighted). all weighted parts are normalized against the clubs in your current batch.</p>
               </div>
             </section>
 
@@ -168,6 +177,8 @@
       <p id="health-pop-season" class="mt-2 text-xs"></p>
       <p id="health-pop-score" class="mt-1 text-sm font-bold"></p>
       <ul id="health-pop-factors" class="mt-2 list-disc pl-5 text-xs"></ul>
+      <p class="mt-2 text-xs font-bold">club facts</p>
+      <ul id="health-pop-team-facts" class="mt-1 list-disc pl-5 text-xs"></ul>
     </section>
     <script src="/app.js" type="module"></script>
   </body>

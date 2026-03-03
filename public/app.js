@@ -15,6 +15,7 @@ const healthPopClose = document.querySelector("#health-pop-close");
 const healthPopSeason = document.querySelector("#health-pop-season");
 const healthPopScore = document.querySelector("#health-pop-score");
 const healthPopFactors = document.querySelector("#health-pop-factors");
+const healthPopTeamFacts = document.querySelector("#health-pop-team-facts");
 const batchForm = document.querySelector("#batch-form");
 const batchInput = document.querySelector("#batch-input");
 const batchStatusEl = document.querySelector("#batch-status");
@@ -26,6 +27,7 @@ let suggestTimer = null;
 let suggestions = [];
 let activeSuggestionIndex = -1;
 let activeTeamRecords = [];
+let activeTeamFacts = [];
 let activeSquadHealth = null;
 
 function setStatus(message) {
@@ -47,12 +49,14 @@ function setPlayerStatus(message) {
 }
 
 function resetHealthWidget() {
+  activeTeamFacts = [];
   activeSquadHealth = null;
   healthFab.textContent = "--%";
   healthPop.classList.add("hidden");
   healthPopSeason.textContent = "";
   healthPopScore.textContent = "";
   healthPopFactors.innerHTML = "";
+  healthPopTeamFacts.innerHTML = "";
 }
 
 function renderHealthWidget(record, squadHealth) {
@@ -71,6 +75,10 @@ function renderHealthWidget(record, squadHealth) {
     <li>depth contributors: ${squadHealth.factors.depthContributors}</li>
     <li>avg appearances: ${squadHealth.factors.avgAppearances}</li>
   `;
+  healthPopTeamFacts.innerHTML = (activeTeamFacts || [])
+    .slice(0, 5)
+    .map((fact) => `<li>${fact}</li>`)
+    .join("");
 }
 
 function hideSuggestions() {
@@ -292,51 +300,94 @@ function wirePlayerSeasonOptions(records) {
   fetchPlayerPerformanceForSelectedSeason();
 }
 
+function formatEuroCompact(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num) || num <= 0) return "-";
+  return new Intl.NumberFormat("en", {
+    notation: "compact",
+    maximumFractionDigits: 2
+  }).format(num);
+}
+
+function formatPct(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return "-";
+  const sign = num > 0 ? "+" : "";
+  return `${sign}${num.toFixed(2)}%`;
+}
+
 function renderBatchTable(data) {
-  const rows = data.teams
+  const sortedTeams = [...data.teams].sort((a, b) => {
+    const aFound = a.found ? 1 : 0;
+    const bFound = b.found ? 1 : 0;
+    if (aFound !== bFound) return bFound - aFound;
+    if (!a.found && !b.found) return a.inputTeam.localeCompare(b.inputTeam);
+    return Number(a.comparison?.rank || 999) - Number(b.comparison?.rank || 999);
+  });
+
+  const rows = sortedTeams
     .map((team) => {
       if (!team.found) {
         return `
           <tr>
+            <td class="border-2 border-black px-2 py-2">-</td>
             <td class="border-2 border-black px-2 py-2">${team.inputTeam}</td>
             <td class="border-2 border-black px-2 py-2">Not found</td>
             <td class="border-2 border-black px-2 py-2">-</td>
             <td class="border-2 border-black px-2 py-2">-</td>
             <td class="border-2 border-black px-2 py-2">-</td>
             <td class="border-2 border-black px-2 py-2">-</td>
+            <td class="border-2 border-black px-2 py-2">-</td>
+            <td class="border-2 border-black px-2 py-2">-</td>
+            <td class="border-2 border-black px-2 py-2">-</td>
+            <td class="border-2 border-black px-2 py-2">-</td>
+            <td class="border-2 border-black px-2 py-2">Not found</td>
           </tr>
         `;
       }
 
-      const leagues = team.associatedLeagues.join(", ");
+      const points = team.comparison?.points || {};
       const uclCount = Number(team.championsLeagueParticipation?.seasonsCount || 0);
-      const ucl = `${uclCount} seasons`;
+      const squadValue = formatEuroCompact(team.squadValue);
+      const squadChange = formatPct(team.squadValueChangePct);
 
       return `
         <tr>
+          <td class="border-2 border-black px-2 py-2 font-bold">${team.comparison?.rank || "-"}</td>
           <td class="border-2 border-black px-2 py-2">${team.resolvedTeam}</td>
+          <td class="border-2 border-black px-2 py-2 font-bold">${team.comparison?.total || 0}/10</td>
+          <td class="border-2 border-black px-2 py-2">${points.performance ?? 0}</td>
+          <td class="border-2 border-black px-2 py-2">${points.leagueLevel ?? 0}</td>
+          <td class="border-2 border-black px-2 py-2">${points.longevity ?? 0}</td>
+          <td class="border-2 border-black px-2 py-2">${points.squadValue ?? 0}</td>
+          <td class="border-2 border-black px-2 py-2">${points.squadMomentum ?? 0}</td>
+          <td class="border-2 border-black px-2 py-2">${squadValue}</td>
+          <td class="border-2 border-black px-2 py-2">${squadChange}</td>
+          <td class="border-2 border-black px-2 py-2">${uclCount}</td>
           <td class="border-2 border-black px-2 py-2">${team.currentLeague}</td>
-          <td class="border-2 border-black px-2 py-2">${leagues}</td>
-          <td class="border-2 border-black px-2 py-2">${ucl}</td>
-          <td class="border-2 border-black px-2 py-2">${team.secondTierConsecutive.current}</td>
-          <td class="border-2 border-black px-2 py-2">${team.secondTierConsecutive.max}</td>
         </tr>
       `;
     })
     .join("");
 
   batchResultsEl.innerHTML = `
-    <p class="text-sm">B-League means Tier 2 domestic league (for example, EFL Championship in England).</p>
+    <p class="text-sm">relative scoring compares all submitted clubs against each other in this batch (weights: performance 4.5, league level 1.5, longevity 1.5, squad value 2.0, squad momentum 2.0). europe is info only.</p>
     <div class="mt-2 overflow-x-auto border-2 border-black">
       <table class="w-full border-collapse text-sm">
         <thead>
           <tr>
+            <th class="border-2 border-black bg-[#FFFF88] px-2 py-2 text-left">Rank</th>
             <th class="border-2 border-black bg-[#FFFF88] px-2 py-2 text-left">Club</th>
+            <th class="border-2 border-black bg-[#FFFF88] px-2 py-2 text-left">Relative Score</th>
+            <th class="border-2 border-black bg-[#FFFF88] px-2 py-2 text-left">Performance (0-4.5)</th>
+            <th class="border-2 border-black bg-[#FFFF88] px-2 py-2 text-left">League Level (0-1.5)</th>
+            <th class="border-2 border-black bg-[#FFFF88] px-2 py-2 text-left">Longevity (0-1.5)</th>
+            <th class="border-2 border-black bg-[#FFFF88] px-2 py-2 text-left">Squad Value (0-2.0)</th>
+            <th class="border-2 border-black bg-[#FFFF88] px-2 py-2 text-left">Squad Momentum (0-2.0)</th>
+            <th class="border-2 border-black bg-[#FFFF88] px-2 py-2 text-left">Current Squad Value</th>
+            <th class="border-2 border-black bg-[#FFFF88] px-2 py-2 text-left">Squad Value Δ%</th>
+            <th class="border-2 border-black bg-[#FFFF88] px-2 py-2 text-left">UCL Seasons (Info)</th>
             <th class="border-2 border-black bg-[#FFFF88] px-2 py-2 text-left">Current League (Explicit)</th>
-            <th class="border-2 border-black bg-[#FFFF88] px-2 py-2 text-left">Associated Leagues (Explicit)</th>
-            <th class="border-2 border-black bg-[#FFFF88] px-2 py-2 text-left">Champions League</th>
-            <th class="border-2 border-black bg-[#FFFF88] px-2 py-2 text-left">Current B-League Streak</th>
-            <th class="border-2 border-black bg-[#FFFF88] px-2 py-2 text-left">Max B-League Streak</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
@@ -361,6 +412,7 @@ form.addEventListener("submit", async (event) => {
   button.disabled = true;
   hideSuggestions();
   hideSections();
+  activeTeamFacts = [];
   setStatus("pulling history and calculating matrix score...");
 
   try {
@@ -375,6 +427,7 @@ form.addEventListener("submit", async (event) => {
     renderSummary(data);
     renderBreakdown(data);
     renderTable(data);
+    activeTeamFacts = Array.isArray(data.teamFacts) ? data.teamFacts : [];
     wirePlayerSeasonOptions(data.records || []);
     setStatus(`done. showing ${data.seasonsFound} seasons for ${data.records[0].team}.`);
   } catch {

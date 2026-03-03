@@ -10,6 +10,7 @@ const LEAGUES = [
   { slug: "eng.2", name: "EFL Championship (England, Tier 2)", country: "ENG", tier: 2 },
   { slug: "eng.3", name: "EFL League One (England, Tier 3)", country: "ENG", tier: 3 },
   { slug: "eng.4", name: "EFL League Two (England, Tier 4)", country: "ENG", tier: 4 },
+  { slug: "eng.5", name: "National League (England, Tier 5)", country: "ENG", tier: 5 },
   { slug: "esp.1", name: "LaLiga (Spain, Tier 1)", country: "ESP", tier: 1 },
   { slug: "esp.2", name: "LaLiga 2 (Spain, Tier 2)", country: "ESP", tier: 2 },
   { slug: "ger.1", name: "Bundesliga (Germany, Tier 1)", country: "GER", tier: 1 },
@@ -91,6 +92,7 @@ function parseLeagueName(apiLeagueName, fallback) {
     ["English League Championship", "EFL Championship (England, Tier 2)"],
     ["English League One", "EFL League One (England, Tier 3)"],
     ["English League Two", "EFL League Two (England, Tier 4)"],
+    ["English National League", "National League (England, Tier 5)"],
     ["Spanish LALIGA", "LaLiga (Spain, Tier 1)"],
     ["Spanish LALIGA 2", "LaLiga 2 (Spain, Tier 2)"],
     ["German Bundesliga", "Bundesliga (Germany, Tier 1)"],
@@ -481,10 +483,14 @@ async function fetchTeamPlayerPerformance(teamId, leagueSlug, seasonYear) {
           ? scorerRows.reduce((sum, r) => sum + metricValue(r, "appearances"), 0) / scorerRows.length
           : 0;
 
-      const depthBonus = Math.min(depthContributors, 12) / 12 * 20;
-      const balanceBonus = (1 - Math.min(topGoalShare, 1)) * 20 + (1 - Math.min(topAssistShare, 1)) * 15;
-      const availabilityBonus = Math.min(avgAppearances / 38, 1) * 15;
-      const score = Math.max(0, Math.min(100, 50 + depthBonus + balanceBonus + availabilityBonus));
+      const scorerPenalty = Math.min(topGoalShare, 1) * 35;
+      const assistPenalty = Math.min(topAssistShare, 1) * 25;
+      const depthPenalty = (1 - Math.min(depthContributors / 10, 1)) * 20;
+      const availabilityPenalty = (1 - Math.min(avgAppearances / 24, 1)) * 20;
+      const score = Math.max(
+        0,
+        Math.min(100, 100 - scorerPenalty - assistPenalty - depthPenalty - availabilityPenalty)
+      );
 
       let label = "stable";
       if (score >= 80) label = "excellent";
@@ -619,6 +625,65 @@ function getSecondTierStreaks(records) {
   }
 
   return { current, max };
+}
+
+function countTierTransitions(records) {
+  let promotions = 0;
+  let relegations = 0;
+  const chron = [...records].sort((a, b) => a.seasonYear - b.seasonYear);
+
+  for (let i = 1; i < chron.length; i += 1) {
+    const prev = chron[i - 1];
+    const cur = chron[i];
+    if (!prev || !cur) continue;
+    if (cur.seasonYear !== prev.seasonYear + 1) continue;
+    if (cur.leagueTier < prev.leagueTier) promotions += 1;
+    if (cur.leagueTier > prev.leagueTier) relegations += 1;
+  }
+
+  return { promotions, relegations };
+}
+
+async function buildTeamFacts(history) {
+  const records = history.records || [];
+  if (!records.length) return [];
+
+  const latest = records[0];
+  const highestTier = Math.min(...records.map((r) => r.leagueTier || 99));
+  const domesticTitles = records.filter((r) => r.position === 1).length;
+  const secondTier = getSecondTierStreaks(records);
+  const transitions = countTierTransitions(records);
+  const ucl = await buildUclParticipation(latest.team, latest.teamId || null);
+
+  const facts = [];
+  if ((ucl?.seasonsCount || 0) === 0) {
+    facts.push("Never qualified for the UEFA Champions League in the tracked seasons.");
+  } else {
+    facts.push(
+      `UEFA Champions League appearances in tracked seasons: ${ucl.seasonsCount} (last: ${ucl.lastSeason}).`
+    );
+  }
+
+  if (highestTier > 1) {
+    facts.push(`Highest tier reached in tracked data: Tier ${highestTier}.`);
+  } else {
+    facts.push("Reached top-flight football in the tracked seasons.");
+  }
+
+  if (domesticTitles === 0) {
+    facts.push("No domestic league titles in the tracked seasons.");
+  } else {
+    facts.push(`Domestic league titles in tracked seasons: ${domesticTitles}.`);
+  }
+
+  facts.push(
+    `Tier-2 streak: current ${secondTier.current} seasons, longest ${secondTier.max} seasons.`
+  );
+  facts.push(
+    `Division moves in tracked seasons: ${transitions.promotions} promotions, ${transitions.relegations} relegations.`
+  );
+
+  return facts;
 }
 
 async function findLikelyLeague(normalizedTarget) {
@@ -806,6 +871,25 @@ async function buildClubInsight(teamName) {
   const secondTier = getSecondTierStreaks(history.records);
   const teamId = history.records[0]?.teamId || null;
   const ucl = await buildUclParticipation(history.records[0].team, teamId);
+  const tier1Seasons = history.records.filter((r) => r.leagueTier === 1).length;
+  const domesticTitles = history.records.filter((r) => r.position === 1).length;
+  const latest = history.records[0];
+  let squadValue = null;
+  let squadValueChangePct = null;
+  let squadValueCoverage = null;
+
+  if (latest?.teamId && latest?.leagueSlug && latest?.seasonYear) {
+    const perfData = await fetchTeamPlayerPerformance(latest.teamId, latest.leagueSlug, latest.seasonYear);
+    const signals = computeSquadValueSignals(perfData);
+    if (signals) {
+      squadValue = signals.squadValue;
+      squadValueChangePct = signals.valueChangePct;
+      squadValueCoverage = {
+        players: signals.coveredPlayers,
+        withPrevious: signals.previousCoverage
+      };
+    }
+  }
 
   return {
     inputTeam: teamName,
@@ -813,11 +897,136 @@ async function buildClubInsight(teamName) {
     resolvedTeam: history.records[0].team,
     associatedLeagues: leagues,
     currentLeague: history.records[0].league,
+    currentTier: history.records[0].leagueTier,
     seasonsFound: history.seasonsFound,
     matrixScore: history.matrix.total,
+    tier1Seasons,
+    domesticTitles,
+    squadValue,
+    squadValueChangePct,
+    squadValueCoverage,
     secondTierConsecutive: secondTier,
     championsLeagueParticipation: ucl
   };
+}
+
+function normalizeRelative(value, min, max) {
+  if (!Number.isFinite(value)) return 0;
+  if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) return 0.5;
+  return (value - min) / (max - min);
+}
+
+function parseMarketValueToEur(valueText) {
+  if (!valueText || typeof valueText !== "string") return null;
+  const raw = valueText
+    .replace(/\s+/g, "")
+    .replace(/€/g, "")
+    .replace(/,/g, ".")
+    .toUpperCase();
+  const m = raw.match(/^([0-9]+(?:\.[0-9]+)?)([KMB])$/);
+  if (!m) return null;
+  const num = Number(m[1]);
+  if (!Number.isFinite(num)) return null;
+  const suffix = m[2];
+  const multiplier = suffix === "B" ? 1_000_000_000 : suffix === "M" ? 1_000_000 : 1_000;
+  return num * multiplier;
+}
+
+function computeSquadValueSignals(perfData) {
+  if (!perfData?.available || !Array.isArray(perfData.tables)) return null;
+
+  const byPlayer = new Map();
+  for (const table of perfData.tables) {
+    for (const row of table.rows || []) {
+      const current = parseMarketValueToEur(row.marketValue);
+      const previous = parseMarketValueToEur(row.marketValuePrevious);
+      if (!Number.isFinite(current)) continue;
+      if (!byPlayer.has(row.playerName)) {
+        byPlayer.set(row.playerName, {
+          current,
+          previous: Number.isFinite(previous) ? previous : null
+        });
+      }
+    }
+  }
+
+  const players = [...byPlayer.values()];
+  if (!players.length) return null;
+
+  const squadValue = players.reduce((sum, p) => sum + (p.current || 0), 0);
+  const previousTotal = players.reduce((sum, p) => sum + (p.previous || 0), 0);
+  const withPrevious = players.filter((p) => Number.isFinite(p.previous)).length;
+  const valueChangePct =
+    previousTotal > 0 ? Number((((squadValue - previousTotal) / previousTotal) * 100).toFixed(2)) : null;
+
+  return {
+    squadValue,
+    valueChangePct,
+    coveredPlayers: players.length,
+    previousCoverage: withPrevious
+  };
+}
+
+function buildRelativeBatchComparisons(insights) {
+  const found = insights.filter((t) => t.found);
+  if (!found.length) return insights;
+
+  const matrixVals = found.map((t) => Number(t.matrixScore) || 0);
+  const tierVals = found.map((t) => Number(t.currentTier) || 99);
+  const longevityVals = found.map((t) => Number(t.seasonsFound) || 0);
+  const squadVals = found.map((t) => Number(t.squadValue) || 0);
+  const squadChangeVals = found.map((t) => Number(t.squadValueChangePct) || 0);
+
+  const matrixMin = Math.min(...matrixVals);
+  const matrixMax = Math.max(...matrixVals);
+  const tierMin = Math.min(...tierVals);
+  const tierMax = Math.max(...tierVals);
+  const longevityMin = Math.min(...longevityVals);
+  const longevityMax = Math.max(...longevityVals);
+  const squadMin = Math.min(...squadVals);
+  const squadMax = Math.max(...squadVals);
+  const squadChangeMin = Math.min(...squadChangeVals);
+  const squadChangeMax = Math.max(...squadChangeVals);
+
+  for (const team of found) {
+    const matrixNorm = normalizeRelative(Number(team.matrixScore) || 0, matrixMin, matrixMax);
+    const tierNorm = 1 - normalizeRelative(Number(team.currentTier) || 99, tierMin, tierMax);
+    const longevityNorm = normalizeRelative(Number(team.seasonsFound) || 0, longevityMin, longevityMax);
+    const squadNorm = normalizeRelative(Number(team.squadValue) || 0, squadMin, squadMax);
+    const squadChangeNorm = normalizeRelative(
+      Number(team.squadValueChangePct) || 0,
+      squadChangeMin,
+      squadChangeMax
+    );
+
+    const points = {
+      performance: Number((matrixNorm * 4.5).toFixed(2)),
+      leagueLevel: Number((tierNorm * 1.5).toFixed(2)),
+      longevity: Number((longevityNorm * 1.5).toFixed(2)),
+      squadValue: Number((squadNorm * 2).toFixed(2)),
+      squadMomentum: Number((squadChangeNorm * 2).toFixed(2))
+    };
+    const total = Number(
+      (
+        points.performance +
+        points.leagueLevel +
+        points.longevity +
+        points.squadValue +
+        points.squadMomentum
+      ).toFixed(2)
+    );
+
+    team.comparison = { total, points, rank: null };
+  }
+
+  found
+    .slice()
+    .sort((a, b) => (b.comparison?.total || 0) - (a.comparison?.total || 0))
+    .forEach((team, idx) => {
+      team.comparison.rank = idx + 1;
+    });
+
+  return insights;
 }
 
 function contentType(filePath) {
@@ -863,7 +1072,8 @@ async function requestHandler(req, res) {
         return;
       }
 
-      sendJson(res, 200, result);
+      const teamFacts = await buildTeamFacts(result);
+      sendJson(res, 200, { ...result, teamFacts });
       return;
     } catch {
       sendJson(res, 500, { error: "Could not build team history right now." });
@@ -924,7 +1134,7 @@ async function requestHandler(req, res) {
       for (const team of teams) {
         insights.push(await buildClubInsight(team));
       }
-      sendJson(res, 200, { source: "ESPN", teams: insights });
+      sendJson(res, 200, { source: "ESPN", teams: buildRelativeBatchComparisons(insights) });
       return;
     } catch {
       sendJson(res, 500, { error: "Could not build batch club insights right now." });
