@@ -10,6 +10,7 @@ const playerSeasonSelect = document.querySelector("#player-season-select");
 const playerStatusEl = document.querySelector("#player-status");
 const playerResultsEl = document.querySelector("#player-results");
 const healthFab = document.querySelector("#health-fab");
+const summaryFab = document.querySelector("#summary-fab");
 const healthPop = document.querySelector("#health-pop");
 const healthPopClose = document.querySelector("#health-pop-close");
 const healthPopSeason = document.querySelector("#health-pop-season");
@@ -29,6 +30,7 @@ let activeSuggestionIndex = -1;
 let activeTeamRecords = [];
 let activeTeamFacts = [];
 let activeSquadHealth = null;
+
 
 function setStatus(message) {
   statusEl.textContent = message;
@@ -299,6 +301,7 @@ function wirePlayerSeasonOptions(records) {
   playerSeasonSelect.disabled = false;
   fetchPlayerPerformanceForSelectedSeason();
 }
+
 
 function formatEuroCompact(value) {
   const num = Number(value);

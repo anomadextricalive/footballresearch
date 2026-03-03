@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Football Club Acquisition - Investment Thesis</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Space Mono', monospace;
+      background-color: #f5f5f5;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    function FootballInvestmentThesis() {
+      const marketData = [
+        {
+          club: "Wolverhampton",
+          askPrice: "£200M",
+          squadValue: "£237M",
+          revenue: "£120M",
+          league: "PL → Championship",
+          tier: "2",
+          position: "20th (Relegated)",
+          metrics: "P/S: 1.67x | Ask/Squad: 0.84x",
+          note: "DISTRESSED ASSET - Parachute payments guaranteed"
+        },
+        {
+          club: "Preston North End",
+          askPrice: "£15M + earnout",
+          squadValue: "£51M",
+          revenue: "£23M",
+          league: "Championship",
+          tier: "2",
+          position: "12th (49pts)",
+          metrics: "P/S: 0.65x | Ask/Squad: 0.29x",
+          note: "DEEP VALUE - 240% discount to squad value"
+        },
+        {
+          club: "Millwall",
+          askPrice: "£150M total",
+          squadValue: "£40M",
+          revenue: "£16M",
+          league: "Championship",
+          tier: "2",
+          position: "3rd (62pts)",
+          metrics: "P/S: 9.38x | Ask/Squad: 3.75x",
+          note: "RE HEDGE - £75M club + £75M property, playoff bound"
+        },
+        {
+          club: "Bolton Wanderers",
+          askPrice: "£45M",
+          squadValue: "£18M",
+          revenue: "£12M",
+          league: "League One",
+          tier: "3",
+          position: "3rd (55pts)",
+          metrics: "P/S: 3.75x | Ask/Squad: 2.50x",
+          note: "HOSPITALITY MODEL - Radisson hotel integrated, 9-game unbeaten"
+        },
+        {
+          club: "Bromley",
+          askPrice: "£18M",
+          squadValue: "£6M",
+          revenue: "£4M",
+          league: "League Two",
+          tier: "4",
+          position: "1st (68pts)",
+          metrics: "P/S: 4.50x | Ask/Squad: 3.00x",
+          note: "LAND PLAY - 145 acres, 2,200 homes planned (Berkeley Homes)"
+        },
+      ];
+
+      const criticalInsights = [
+        {
+          title: "WOLVES_TECHNICAL_COLLAPSE",
+          data: "xG: 17.2 | Actual Goals: 11 | xGA: 27.7 | Actual Conceded: 40",
+          insight: "Goalkeeper save % 57.1% (league-worst) = 12.3 goals over expected. These 12 goals = £200M valuation gap.",
+          action: "EXPLOIT: Rob Edwards (new manager) PPG improved 0.18→0.61 but relegation near-certain. Championship parachute = £80M guaranteed."
+        },
+        {
+          title: "LEICESTER_CATASTROPHE",
+          data: "Squad Value: £290M | Position: 22nd Championship (relegation zone)",
+          insight: "Hayden Hackney (Middlesbrough MVP, €25M) outperforming Leicester's £290M squad. Parachute mismanagement = League One trajectory.",
+          action: "AVOID: Ask/Squad 1.21x overvalued for forced-sale relegation scenario. £350M ask detached from reality."
+        },
+        {
+          title: "MILLWALL_OVERPERFORMANCE",
+          data: "Squad Value: £40M | Position: 3rd (62pts, playoff/auto promotion track)",
+          insight: "Maximizing £40M squad to compete with £290M Leicester. RE component (£75M) provides downside floor.",
+          action: "DEFENSIVE PLAY: Football upside + tangible asset security. Requires RE development capability."
+        },
+        {
+          title: "PRESTON_ARBITRAGE",
+          data: "Ask: £15M | Squad: £51M | Revenue: £23M",
+          insight: "Ask/Squad 0.29x = acquire club, liquidate top 3 players (£19M), recoup investment + own stadium/land.",
+          action: "DEEP VALUE: Lowest risk entry. Promotion earnout must be capped at £25M max."
+        },
+        {
+          title: "BOLTON_HOTEL_SYNERGY",
+          data: "Radisson Individuals: 125 rooms, 19 with pitch views | Middlebrook Retail Park: 0.34mi",
+          insight: "Non-matchday revenue diversification. Championship promotion = £11M distribution jump covers £18M squad cost in 2 seasons.",
+          action: "INFRASTRUCTURE GROWTH: First Radisson sports-hotel. Template for modern League One asset."
+        },
+      ];
+
+      const redFlags = [
+        { club: "Brentford", issue: "£400M for 75% = £533M EV at 3.08x P/S. Minority stake + Matthew Benham selectivity = control risk" },
+        { club: "Leicester", issue: "Championship 22nd position with £290M squad = systemic failure. League One relegation = fire sale" },
+        { club: "Watford", issue: "'Needs improvement' infrastructure = hidden capex not in £125M ask" },
+        { club: "Crawley", issue: "'Must buy back from council' = political execution risk. 21st League Two (relegation risk)" },
+      ];
+
+      const thesis = [
+        {
+          rank: "01",
+          club: "WOLVERHAMPTON_WANDERERS",
+          price: "£200M",
+          strategy: "DISTRESSED_ASSET_RECOVERY",
+          thesis: "Premier League infrastructure at Championship pricing. Relegation-driven mispricing creates 19% embedded equity cushion (£237M squad vs £200M ask). £80M parachute payments guarantee 2.5-year runway regardless of performance.",
+          technicals: "Save % 57.1% (worst in PL) + xG underperformance = tactical failure, not talent deficit. Rob Edwards appointment shows 3.4x PPG improvement but relegation locked. Championship promotion probability: 55% for relegated clubs retaining squads.",
+          financials: "Revenue floor: £212M guaranteed over 2 years (parachute schedule). Promotion upside: £60-90M annual increase. Player liquidity: Top 3 = £128M (64% of ask).",
+          execute: "Open £175M + £15-25M earnouts (promotion/survival triggers). Walk at £210M all-in. 90-day close timeline.",
+        },
+        {
+          rank: "02",
+          club: "PRESTON_NORTH_END",
+          price: "£15M + EARNOUT",
+          strategy: "ASYMMETRIC_VALUE_ARBITRAGE",
+          thesis: "3.4x asset coverage (£51M squad for £15M entry) = highest margin in dataset. Liquidation scenario: sell top 3 players (£19M), recoup investment, retain stadium/training/land. Mid-table stability (12th, 49pts) = minimal relegation risk.",
+          technicals: "Break-even at £15-18M revenue vs current £23M = 28% buffer. Promotion probability 15-20% base, increases to 30-35% with £8-12M annual squad investment.",
+          financials: "PL promotion = £150-250M valuation (10-17x entry). Development land optionality provides secondary upside. P/S 0.65x = 74% discount to Championship median (2.5x).",
+          execute: "Offer £15M upfront. Cap earnout at £25M max (50% on PL promotion, 25% year 1 survival, 25% year 2). Total walk-away: £40M all-in.",
+        },
+        {
+          rank: "03",
+          club: "MILLWALL",
+          price: "£75M CLUB + £75M RE",
+          strategy: "REAL_ESTATE_HEDGE",
+          thesis: "Dual-asset structure: £75M football operations + £75M mixed-use development (1,100 residential units, hotel, commercial). On-field overperformance (3rd, 62pts, playoff track) with £40M squad demonstrates operational efficiency.",
+          technicals: "Maximizing low-cost squad vs Leicester's £290M failure = superior management. Promotion probability elevated by current form. RE component provides tangible floor independent of sporting results.",
+          financials: "Football-only at £75M overpriced (Ask/Squad 1.88x). Combined £150M justified by London market RE upside. Playoff success = Championship revenue jump funds development.",
+          execute: "Clarify: Can £75M club be separated from RE? If bundled, requires dedicated RE development team. Only proceed if mandate includes property expertise.",
+        },
+      ];
+
+      const keyTakeaways = [
+        "WOLVES = Best institutional play. Distressed Premier League asset at Championship discount with guaranteed revenue floor.",
+        "PRESTON = Highest risk-adjusted return. 240% upside to asset parity with minimal downside (liquidation covers entry).",
+        "MILLWALL = Property-led diversification. Football success accelerates RE value realization. Requires dual-capability.",
+        "LEICESTER/BRENTFORD = Avoid. Premium pricing without margin for error (Leicester systemic failure, Brentford minority stake).",
+        "CHAMPIONSHIP = Sweet spot tier. Premier League promotion = 3-5x revenue overnight. Infrastructure ownership critical.",
+      ];
+
+      return (
+        <div className="min-h-screen bg-[#f5f5f5] p-4 md:p-8">
+          <div className="max-w-7xl mx-auto space-y-8">
+            
+            {/* Header */}
+            <div className="border-2 border-black bg-[#FFFF88] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-6 md:p-8">
+              <div className="mb-3 font-['Space_Mono',monospace] opacity-60 text-xs">
+                CONFIDENTIAL_INVESTMENT_THESIS / MARCH_2026_AUDIT
+              </div>
+              <h1 className="font-['Space_Mono',monospace] font-bold text-2xl md:text-3xl mb-3">
+                ENGLISH_FOOTBALL_ACQUISITION
+              </h1>
+              <div className="font-['Space_Mono',monospace] text-sm md:text-base mb-4">
+                STRATEGIC_ASSET_VALUATION_&_TECHNICAL_PERFORMANCE_REVIEW
+              </div>
+              <div className="flex gap-3 flex-wrap text-xs">
+                <div className="border-2 border-black bg-white px-3 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                  <span className="font-['Space_Mono',monospace]">FY_2025/2026</span>
+                </div>
+                <div className="border-2 border-black bg-white px-3 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                  <span className="font-['Space_Mono',monospace]">12_CLUBS_AUDITED</span>
+                </div>
+                <div className="border-2 border-black bg-white px-3 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                  <span className="font-['Space_Mono',monospace]">PANEL_READY</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Executive Summary */}
+            <div className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="border-b-2 border-black bg-black text-white px-4 md:px-6 py-3">
+                <h2 className="font-['Space_Mono',monospace] font-bold text-sm md:text-base">
+                  [ 01 ] EXECUTIVE_SUMMARY
+                </h2>
+              </div>
+              <div className="p-4 md:p-6 space-y-3 font-['Space_Mono',monospace] text-xs md:text-sm leading-relaxed">
+                <p>
+                  Based on March 2026 fiscal audit of 12 English football clubs across 5 tiers, <strong>WOLVERHAMPTON WANDERERS (£200M)</strong> represents the optimal institutional acquisition: Premier League infrastructure at Championship pricing with £80M guaranteed parachute payments and 19% embedded equity cushion.
+                </p>
+                <p>
+                  <strong>PRESTON NORTH END (£15M + earnout)</strong> offers asymmetric value with 3.4x asset coverage—the deepest discount in the dataset. <strong>MILLWALL (£150M total)</strong> provides real estate diversification with £75M property component hedging football volatility.
+                </p>
+                <p className="pt-2 border-t border-gray-200 text-xs opacity-70">
+                  Market Context: Championship P/S median 2.5x | Ask/Squad healthy range 0.9-1.2x | Premier League promotion = 3-5x revenue increase
+                </p>
+              </div>
+            </div>
+
+            {/* Market Dataset */}
+            <div className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="border-b-2 border-black bg-black text-white px-4 md:px-6 py-3">
+                <h2 className="font-['Space_Mono',monospace] font-bold text-sm md:text-base">
+                  [ 02 ] PRIORITY_TARGETS_DATASET
+                </h2>
+              </div>
+              <div className="p-4 md:p-6">
+                <div className="space-y-3">
+                  {marketData.map((club, index) => (
+                    <div key={index} className="border-2 border-black bg-white p-3 md:p-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                      <div className="flex justify-between items-start gap-3 mb-2 flex-wrap">
+                        <div>
+                          <div className="font-['Space_Mono',monospace] font-bold text-sm md:text-base">{club.club}</div>
+                          <div className="font-['Space_Mono',monospace] text-xs opacity-70">{club.league} | {club.position}</div>
+                        </div>
+                        <div className="border-2 border-black bg-[#FFFF88] px-3 py-1 text-xs">
+                          <span className="font-['Space_Mono',monospace] font-bold">{club.askPrice}</span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 mb-2 text-xs">
+                        <div className="font-['Space_Mono',monospace]">Squad: {club.squadValue}</div>
+                        <div className="font-['Space_Mono',monospace]">Revenue: {club.revenue}</div>
+                      </div>
+                      <div className="font-['Space_Mono',monospace] text-xs opacity-70 mb-2">{club.metrics}</div>
+                      <div className="border-t border-gray-200 pt-2 font-['Space_Mono',monospace] text-xs">
+                        {club.note}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Critical Insights */}
+            <div className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="border-b-2 border-black bg-black text-white px-4 md:px-6 py-3">
+                <h2 className="font-['Space_Mono',monospace] font-bold text-sm md:text-base">
+                  [ 03 ] CRITICAL_TECHNICAL_INSIGHTS
+                </h2>
+              </div>
+              <div className="p-4 md:p-6 space-y-3">
+                {criticalInsights.map((item, index) => (
+                  <div key={index} className="border-2 border-black bg-white p-3 md:p-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                    <div className="font-['Space_Mono',monospace] font-bold mb-2 text-xs md:text-sm">{item.title}</div>
+                    <div className="font-['Space_Mono',monospace] text-xs mb-2 bg-gray-50 p-2 border border-gray-200">
+                      {item.data}
+                    </div>
+                    <div className="font-['Space_Mono',monospace] text-xs mb-2 opacity-80">
+                      <strong>INSIGHT:</strong> {item.insight}
+                    </div>
+                    <div className="font-['Space_Mono',monospace] text-xs bg-[#FFFF88] p-2 border-l-4 border-black">
+                      <strong>ACTION:</strong> {item.action}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Investment Thesis */}
+            <div className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="border-b-2 border-black bg-[#FFFF88] px-4 md:px-6 py-3">
+                <h2 className="font-['Space_Mono',monospace] font-bold text-sm md:text-base">
+                  [ 04 ] RANKED_INVESTMENT_THESIS
+                </h2>
+              </div>
+              <div className="divide-y-2 divide-black">
+                {thesis.map((item, index) => (
+                  <div key={index} className="p-4 md:p-6">
+                    <div className="flex justify-between items-start gap-3 mb-3 flex-wrap">
+                      <div className="flex-1">
+                        <div className="font-['Space_Mono',monospace] opacity-50 text-xs mb-1">RANK_{item.rank}</div>
+                        <h3 className="font-['Space_Mono',monospace] font-bold text-base md:text-xl mb-2">
+                          {item.club}
+                        </h3>
+                        <div className="inline-block border-2 border-black px-3 py-1 bg-white text-xs">
+                          <span className="font-['Space_Mono',monospace]">{item.strategy}</span>
+                        </div>
+                      </div>
+                      <div className="border-2 border-black bg-[#FFFF88] px-4 py-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                        <div className="font-['Space_Mono',monospace] font-bold text-sm">{item.price}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3 font-['Space_Mono',monospace] text-xs">
+                      <div>
+                        <div className="font-bold mb-1">THESIS:</div>
+                        <div className="opacity-80 leading-relaxed">{item.thesis}</div>
+                      </div>
+                      <div>
+                        <div className="font-bold mb-1">TECHNICAL_ANALYSIS:</div>
+                        <div className="opacity-80 leading-relaxed">{item.technicals}</div>
+                      </div>
+                      <div>
+                        <div className="font-bold mb-1">FINANCIAL_STRUCTURE:</div>
+                        <div className="opacity-80 leading-relaxed">{item.financials}</div>
+                      </div>
+                      <div className="bg-gray-50 p-3 border-l-4 border-black">
+                        <div className="font-bold mb-1">EXECUTION:</div>
+                        <div className="opacity-80 leading-relaxed">{item.execute}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Red Flags */}
+            <div className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="border-b-2 border-black bg-black text-white px-4 md:px-6 py-3">
+                <h2 className="font-['Space_Mono',monospace] font-bold text-sm md:text-base">
+                  [ 05 ] DE-PRIORITIZED_&_RED_FLAGS
+                </h2>
+              </div>
+              <div className="p-4 md:p-6 space-y-2">
+                {redFlags.map((item, index) => (
+                  <div key={index} className="border-2 border-black bg-white p-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex justify-between gap-3 flex-wrap">
+                    <div className="font-['Space_Mono',monospace] font-bold text-xs md:text-sm">
+                      {item.club}
+                    </div>
+                    <div className="font-['Space_Mono',monospace] text-xs opacity-70 flex-1">
+                      {item.issue}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Key Takeaways */}
+            <div className="border-2 border-black bg-[#FFFF88] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="border-b-2 border-black bg-black text-white px-4 md:px-6 py-3">
+                <h2 className="font-['Space_Mono',monospace] font-bold text-sm md:text-base">
+                  [ 06 ] KEY_TAKEAWAYS
+                </h2>
+              </div>
+              <div className="p-4 md:p-6 space-y-2">
+                {keyTakeaways.map((item, index) => (
+                  <div key={index} className="flex gap-3 font-['Space_Mono',monospace] text-xs md:text-sm">
+                    <span className="opacity-50 font-bold">{String(index + 1).padStart(2, '0')}.</span>
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Outtakes */}
+            <div className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="border-b-2 border-black bg-black text-white px-4 md:px-6 py-3">
+                <h2 className="font-['Space_Mono',monospace] font-bold text-sm md:text-base">
+                  [ 07 ] OUTTAKES_&_MARKET_INTELLIGENCE
+                </h2>
+              </div>
+              <div className="p-4 md:p-6 space-y-4 font-['Space_Mono',monospace] text-xs leading-relaxed">
+                <div className="border-l-4 border-black pl-3">
+                  <div className="font-bold mb-1">BOLTON'S_RADISSON_MODEL:</div>
+                  <div className="opacity-80">First Radisson Individuals sports-hotel. 125 rooms, 19 with pitch views. Non-matchday revenue via Middlebrook Retail Park (UK's largest, 0.34mi away). 9-game unbeaten run under Steven Schumacher. Template for modern League One diversification.</div>
+                </div>
+                
+                <div className="border-l-4 border-black pl-3">
+                  <div className="font-bold mb-1">BROMLEY_LAND_PLAY:</div>
+                  <div className="opacity-80">1st in League Two (68pts, 2.00 PPG). Berkeley Homes "Ravensbourne Place" development: 145 acres → 2,200 homes (50% affordable housing). Grey Belt policy enables planning. Club = community anchor for multi-billion pound project. £18M entry for development upside.</div>
+                </div>
+                
+                <div className="border-l-4 border-black pl-3">
+                  <div className="font-bold mb-1">HAYDEN_HACKNEY_MVP:</div>
+                  <div className="opacity-80">Middlesbrough midfielder valued €25M = Championship ceiling benchmark. Outperforming Leicester's £290M squad (sitting 22nd). Sets valuation comparables for tier.</div>
+                </div>
+                
+                <div className="border-l-4 border-black pl-3">
+                  <div className="font-bold mb-1">PARACHUTE_PAYMENT_SCHEDULE:</div>
+                  <div className="opacity-80">Wolves guaranteed: Year 1 = £44M, Year 2 = £36M. Total £80M regardless of Championship performance = 2.5-year operational runway. Leicester mismanaged parachutes → now 22nd Championship facing League One.</div>
+                </div>
+                
+                <div className="border-l-4 border-black pl-3">
+                  <div className="font-bold mb-1">CLUB_AS_PLATFORM_THESIS:</div>
+                  <div className="opacity-80">2026 market shift: "Club as Sport" → "Club as Platform". True value migrated to Infrastructure + Land plays. Premier League = revenue ceiling, but investment alpha in EFL's tangible asset bases.</div>
+                </div>
+
+                <div className="border-t-2 border-black pt-3 mt-3 text-xs opacity-60">
+                  Data Sources: Transfermarkt (squad values), Deloitte ARFF 2024 (revenue), EFL/Premier League (broadcasting), FBref (xG/xGA metrics), March 2026 league tables verified.
+                </div>
+              </div>
+            </div>
+
+            {/* Panel Action */}
+            <div className="border-2 border-black bg-[#FFFF88] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 md:p-6">
+              <div className="font-['Space_Mono',monospace] opacity-60 mb-3 text-xs">
+                PANEL_DECISION_REQUIRED
+              </div>
+              <div className="flex gap-3 flex-wrap">
+                <button className="border-2 border-black px-4 md:px-6 py-2 md:py-3 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-['Space_Mono',monospace] text-xs md:text-sm">
+                  APPROVE_WOLVES_NEGOTIATION
+                </button>
+                <button className="border-2 border-black px-4 md:px-6 py-2 md:py-3 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-['Space_Mono',monospace] text-xs md:text-sm">
+                  REQUEST_PRESTON_DUE_DILIGENCE
+                </button>
+                <button className="border-2 border-black px-4 md:px-6 py-2 md:py-3 bg-black text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-['Space_Mono',monospace] font-bold text-xs md:text-sm">
+                  PROCEED_TO_CALL
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<FootballInvestmentThesis />);
+  </script>
+</body>
+</html>
