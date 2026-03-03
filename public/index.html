@@ -147,9 +147,28 @@
       </main>
     </div>
 
-    <template id="ui-helpers">
-      <div class="hidden border-2 border-black bg-white p-3"></div>
-    </template>
+    <button
+      id="health-fab"
+      type="button"
+      class="fixed bottom-5 right-5 z-40 h-16 w-16 border-2 border-black bg-[#FFFF88] text-xs font-bold shadow-[4px_4px_0_0_#000]"
+      aria-label="Squad health"
+    >
+      --%
+    </button>
+    <section
+      id="health-pop"
+      class="fixed bottom-24 right-5 z-40 hidden w-72 border-2 border-black bg-white p-3 shadow-[4px_4px_0_0_#000]"
+    >
+      <div class="flex items-center justify-between gap-2">
+        <h4 class="text-sm font-bold">Squad Health</h4>
+        <button id="health-pop-close" type="button" class="border-2 border-black bg-white px-2 py-1 text-xs font-bold">
+          X
+        </button>
+      </div>
+      <p id="health-pop-season" class="mt-2 text-xs"></p>
+      <p id="health-pop-score" class="mt-1 text-sm font-bold"></p>
+      <ul id="health-pop-factors" class="mt-2 list-disc pl-5 text-xs"></ul>
+    </section>
     <script src="/app.js" type="module"></script>
   </body>
 </html>

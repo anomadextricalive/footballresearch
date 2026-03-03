@@ -9,6 +9,12 @@ const suggestBox = document.querySelector("#club-suggest-box");
 const playerSeasonSelect = document.querySelector("#player-season-select");
 const playerStatusEl = document.querySelector("#player-status");
 const playerResultsEl = document.querySelector("#player-results");
+const healthFab = document.querySelector("#health-fab");
+const healthPop = document.querySelector("#health-pop");
+const healthPopClose = document.querySelector("#health-pop-close");
+const healthPopSeason = document.querySelector("#health-pop-season");
+const healthPopScore = document.querySelector("#health-pop-score");
+const healthPopFactors = document.querySelector("#health-pop-factors");
 const batchForm = document.querySelector("#batch-form");
 const batchInput = document.querySelector("#batch-input");
 const batchStatusEl = document.querySelector("#batch-status");
@@ -20,6 +26,7 @@ let suggestTimer = null;
 let suggestions = [];
 let activeSuggestionIndex = -1;
 let activeTeamRecords = [];
+let activeSquadHealth = null;
 
 function setStatus(message) {
   statusEl.textContent = message;
@@ -37,6 +44,33 @@ function setBatchStatus(message) {
 
 function setPlayerStatus(message) {
   playerStatusEl.textContent = message;
+}
+
+function resetHealthWidget() {
+  activeSquadHealth = null;
+  healthFab.textContent = "--%";
+  healthPop.classList.add("hidden");
+  healthPopSeason.textContent = "";
+  healthPopScore.textContent = "";
+  healthPopFactors.innerHTML = "";
+}
+
+function renderHealthWidget(record, squadHealth) {
+  if (!record || !squadHealth) {
+    resetHealthWidget();
+    return;
+  }
+
+  activeSquadHealth = { record, squadHealth };
+  healthFab.textContent = `${Math.round(squadHealth.score)}%`;
+  healthPopSeason.textContent = `${record.season} — ${record.league}`;
+  healthPopScore.textContent = `health: ${squadHealth.score}/100 (${squadHealth.label})`;
+  healthPopFactors.innerHTML = `
+    <li>scorer dependency: ${squadHealth.factors.scorerDependency}%</li>
+    <li>assist dependency: ${squadHealth.factors.assistDependency}%</li>
+    <li>depth contributors: ${squadHealth.factors.depthContributors}</li>
+    <li>avg appearances: ${squadHealth.factors.avgAppearances}</li>
+  `;
 }
 
 function hideSuggestions() {
@@ -169,6 +203,7 @@ function resetPlayerPanel() {
   playerResultsEl.innerHTML = "";
   playerResultsEl.classList.add("hidden");
   setPlayerStatus("");
+  resetHealthWidget();
 }
 
 function renderPlayerTables(data) {
@@ -180,14 +215,22 @@ function renderPlayerTables(data) {
 
   const blocks = (data.tables || [])
     .map((table) => {
-      const headers = ["RK", "Player", ...(table.headers || []).slice(2).map((h) => h.title)];
+      const headers = ["RK", "Player", "Market Value", ...(table.headers || []).slice(2).map((h) => h.title)];
       const rows = (table.rows || [])
         .slice(0, 10)
         .map((row) => {
           const metricCells = row.metrics
             .map((m) => `<td class="border-2 border-black px-2 py-1">${m.value}</td>`)
             .join("");
-          return `<tr><td class="border-2 border-black px-2 py-1">${row.rank}</td><td class="border-2 border-black px-2 py-1">${row.playerName}</td>${metricCells}</tr>`;
+          const marketValue = row.marketValue || "-";
+          const previous = row.marketValuePrevious || null;
+          const trend = row.marketTrend || "unknown";
+          const trendClass =
+            trend === "up" ? "text-green-700 font-bold" : trend === "down" ? "text-red-700 font-bold" : "";
+          const trendLabel =
+            trend === "up" ? "▲" : trend === "down" ? "▼" : trend === "flat" ? "•" : "";
+          const trendText = previous ? ` <span class="text-xs">(${trendLabel} prev: ${previous})</span>` : "";
+          return `<tr><td class="border-2 border-black px-2 py-1">${row.rank}</td><td class="border-2 border-black px-2 py-1">${row.playerName}</td><td class="border-2 border-black px-2 py-1 ${trendClass}">${marketValue}${trendText}</td>${metricCells}</tr>`;
         })
         .join("");
 
@@ -227,6 +270,7 @@ async function fetchPlayerPerformanceForSelectedSeason() {
       return;
     }
     renderPlayerTables(data);
+    renderHealthWidget(record, data.squadHealth);
     setPlayerStatus("player stats loaded.");
   } catch {
     setPlayerStatus("could not reach player performance service.");
@@ -404,6 +448,15 @@ input.addEventListener("blur", () => {
 
 playerSeasonSelect.addEventListener("change", () => {
   fetchPlayerPerformanceForSelectedSeason();
+});
+
+healthFab.addEventListener("click", () => {
+  if (!activeSquadHealth) return;
+  healthPop.classList.toggle("hidden");
+});
+
+healthPopClose.addEventListener("click", () => {
+  healthPop.classList.add("hidden");
 });
 
 resetPlayerPanel();

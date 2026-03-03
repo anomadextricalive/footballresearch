@@ -39,6 +39,8 @@ const standingsCache = new Map();
 const teamCache = new Map();
 const uclCache = new Map();
 const performanceCache = new Map();
+const marketValueCache = new Map();
+const marketHistoryCache = new Map();
 let uclSeasonIndexPromise = null;
 let clubDirectoryPromise = null;
 
@@ -119,6 +121,135 @@ function isTeamMatch(entryTeam, normalizedTarget) {
     if (candidate.replace(/\s+/g, "") === normalizedTarget.replace(/\s+/g, "")) return true;
   }
   return false;
+}
+
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function stripTags(value) {
+  return value.replace(/<[^>]*>/g, "");
+}
+
+function decodeHtml(value) {
+  return value
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+}
+
+async function fetchPlayerMarketValue(playerName) {
+  const key = normalizeTeamName(playerName);
+  if (!key) return null;
+  if (marketValueCache.has(key)) return marketValueCache.get(key);
+
+  const promise = (async () => {
+    const query = encodeURIComponent(playerName);
+    const url = `https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=${query}`;
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0"
+      }
+    });
+    if (!res.ok) return null;
+
+    const html = await res.text();
+    const rowRegex =
+      /<td><table class="inline-table">[\s\S]*?<\/table><\/td>[\s\S]*?<td class="rechts hauptlink">([^<]+)<\/td>/g;
+    const players = [];
+    let match;
+    while ((match = rowRegex.exec(html)) !== null) {
+      const row = match[0];
+      const valueRaw = stripTags(match[1]).trim();
+      const nameMatch = row.match(/<a title="([^"]+)" href="\/[^"]+\/profil\/spieler\/(\d+)">/);
+      if (!nameMatch) continue;
+      const candidateName = decodeHtml(nameMatch[1]).trim();
+      const playerId = nameMatch[2] || null;
+      const normCandidate = normalizeTeamName(candidateName);
+      players.push({ candidateName, normCandidate, valueRaw, playerId });
+    }
+
+    const exact = players.find((p) => p.normCandidate === key);
+    if (exact) return exact;
+
+    const loose = players.find(
+      (p) => p.normCandidate.includes(key) || key.includes(p.normCandidate)
+    );
+    return loose || null;
+  })().catch(() => null);
+
+  marketValueCache.set(key, promise);
+  return promise;
+}
+
+async function fetchPlayerMarketHistory(playerId) {
+  if (!playerId) return null;
+  if (marketHistoryCache.has(playerId)) return marketHistoryCache.get(playerId);
+
+  const promise = (async () => {
+    const url = `https://tmapi-alpha.transfermarkt.technology/player/${encodeURIComponent(
+      playerId
+    )}/market-value-history`;
+    const res = await fetch(url, {
+      headers: {
+        Accept: "application/json",
+        "User-Agent": "Mozilla/5.0"
+      }
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    if (!json?.success || !json?.data) return null;
+    return json.data;
+  })().catch(() => null);
+
+  marketHistoryCache.set(playerId, promise);
+  return promise;
+}
+
+function compactToText(compact) {
+  if (!compact || typeof compact !== "object") return null;
+  const prefix = compact.prefix || "";
+  const content = compact.content || "";
+  const suffix = compact.suffix || "";
+  const out = `${prefix}${content}${suffix}`.trim();
+  return out || null;
+}
+
+async function fetchPlayerMarketSnapshot(playerName) {
+  const hit = await fetchPlayerMarketValue(playerName);
+  if (!hit) return null;
+
+  const snapshot = {
+    current: hit.valueRaw || null,
+    previous: null,
+    trend: "unknown"
+  };
+
+  if (!hit.playerId) return snapshot;
+
+  const historyData = await fetchPlayerMarketHistory(hit.playerId);
+  const history = Array.isArray(historyData?.history) ? historyData.history : [];
+  const currentNode = historyData?.current || history[history.length - 1] || null;
+  const previousNode = history.length > 1 ? history[history.length - 2] : null;
+
+  const currentValue = Number(currentNode?.marketValue?.value);
+  const previousValue = Number(previousNode?.marketValue?.value);
+
+  const currentText = compactToText(currentNode?.marketValue?.compact) || snapshot.current;
+  const previousText = compactToText(previousNode?.marketValue?.compact) || null;
+
+  snapshot.current = currentText;
+  snapshot.previous = previousText;
+
+  if (Number.isFinite(currentValue) && Number.isFinite(previousValue)) {
+    if (currentValue > previousValue) snapshot.trend = "up";
+    else if (currentValue < previousValue) snapshot.trend = "down";
+    else snapshot.trend = "flat";
+  }
+
+  return snapshot;
 }
 
 async function fetchLeagueTeams(league) {
@@ -290,7 +421,10 @@ async function fetchTeamPlayerPerformance(teamId, leagueSlug, seasonYear) {
           playerName: player.name || player.shortName || "Unknown",
           playerShortName: player.shortName || player.name || "Unknown",
           playerHref: player.href || null,
-          metrics
+          metrics,
+          marketValue: null,
+          marketValuePrevious: null,
+          marketTrend: "unknown"
         };
       });
 
@@ -301,11 +435,81 @@ async function fetchTeamPlayerPerformance(teamId, leagueSlug, seasonYear) {
       };
     });
 
+    // Resolve market values for visible players and apply across all tables.
+    const nameToRows = new Map();
+    for (const table of tables) {
+      for (const row of table.rows) {
+        if (!nameToRows.has(row.playerName)) nameToRows.set(row.playerName, []);
+        nameToRows.get(row.playerName).push(row);
+      }
+    }
+    const names = [...nameToRows.keys()].slice(0, 30);
+    const values = await Promise.all(
+      names.map(async (name) => ({ name, snapshot: await fetchPlayerMarketSnapshot(name) }))
+    );
+    for (const item of values) {
+      for (const row of nameToRows.get(item.name) || []) {
+        row.marketValue = item.snapshot?.current || null;
+        row.marketValuePrevious = item.snapshot?.previous || null;
+        row.marketTrend = item.snapshot?.trend || "unknown";
+      }
+    }
+
+    function metricValue(row, key) {
+      const metric = row.metrics.find((m) => m.key === key);
+      return metric ? Number(metric.value) || 0 : 0;
+    }
+
+    function computeSquadHealth() {
+      const scorers = tables.find((t) => /scorer/i.test(t.title));
+      const assisters = tables.find((t) => /assist/i.test(t.title));
+      const scorerRows = scorers?.rows || [];
+      const assistRows = assisters?.rows || [];
+
+      const totalGoals = scorerRows.reduce((sum, r) => sum + metricValue(r, "totalGoals"), 0);
+      const totalAssists = assistRows.reduce((sum, r) => sum + metricValue(r, "goalAssists"), 0);
+      const topGoalShare = totalGoals > 0 ? metricValue(scorerRows[0] || { metrics: [] }, "totalGoals") / totalGoals : 0;
+      const topAssistShare =
+        totalAssists > 0 ? metricValue(assistRows[0] || { metrics: [] }, "goalAssists") / totalAssists : 0;
+
+      const goalContributors = scorerRows.filter((r) => metricValue(r, "totalGoals") > 0).length;
+      const assistContributors = assistRows.filter((r) => metricValue(r, "goalAssists") > 0).length;
+      const depthContributors = Math.max(goalContributors, assistContributors);
+
+      const avgAppearances =
+        scorerRows.length > 0
+          ? scorerRows.reduce((sum, r) => sum + metricValue(r, "appearances"), 0) / scorerRows.length
+          : 0;
+
+      const depthBonus = Math.min(depthContributors, 12) / 12 * 20;
+      const balanceBonus = (1 - Math.min(topGoalShare, 1)) * 20 + (1 - Math.min(topAssistShare, 1)) * 15;
+      const availabilityBonus = Math.min(avgAppearances / 38, 1) * 15;
+      const score = Math.max(0, Math.min(100, 50 + depthBonus + balanceBonus + availabilityBonus));
+
+      let label = "stable";
+      if (score >= 80) label = "excellent";
+      else if (score >= 65) label = "good";
+      else if (score >= 50) label = "average";
+      else label = "fragile";
+
+      return {
+        score: Number(score.toFixed(1)),
+        label,
+        factors: {
+          scorerDependency: Number((topGoalShare * 100).toFixed(1)),
+          assistDependency: Number((topAssistShare * 100).toFixed(1)),
+          depthContributors,
+          avgAppearances: Number(avgAppearances.toFixed(1))
+        }
+      };
+    }
+
     return {
       available: true,
       seasonDisplayName: payload?.page?.content?.stats?.season?.displayName || null,
       league: payload?.page?.content?.stats?.soccerLeague || null,
-      tables
+      tables,
+      squadHealth: computeSquadHealth()
     };
   })().catch(() => ({ available: false, message: "Failed to fetch player performance." }));
 
