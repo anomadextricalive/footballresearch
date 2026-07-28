@@ -1,328 +1,265 @@
-<title>Crystal Palace FC — Investment Feasibility Memo</title>
-<style>
-:root{
-  --paper:#f2efe7;
-  --ink:#15140f;
-  --ink-soft:#4a4740;
-  --line:#15140f;
-  --claret:#7c1230;
-  --claret-soft:#a8455f;
-  --navy:#1c2a4a;
-  --flag:#ffe066;
-  --flag-ink:#3a2e00;
-  --good:#1f6d4a;
-  --bad:#a8341c;
-  --card:#fbfaf5;
-}
-:root[data-theme="dark"]{
-  --paper:#141310;
-  --ink:#ece7da;
-  --ink-soft:#b6b0a2;
-  --line:#ece7da;
-  --claret:#e0637f;
-  --claret-soft:#c6485f;
-  --navy:#7f96c9;
-  --flag:#d9a52e;
-  --flag-ink:#1a1400;
-  --good:#5fce9c;
-  --bad:#e2795f;
-  --card:#1c1a15;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --paper:#141310;
-    --ink:#ece7da;
-    --ink-soft:#b6b0a2;
-    --line:#ece7da;
-    --claret:#e0637f;
-    --claret-soft:#c6485f;
-    --navy:#7f96c9;
-    --flag:#d9a52e;
-    --flag-ink:#1a1400;
-    --good:#5fce9c;
-    --bad:#e2795f;
-    --card:#1c1a15;
-  }
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crystal Palace FC - Investment Feasibility</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Space Mono', monospace;
+      background-color: #f5f5f5;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
 
-*{box-sizing:border-box;}
-body{
-  margin:0;
-  background:var(--paper);
-  color:var(--ink);
-  font-family:'IBM Plex Mono','SF Mono',ui-monospace,'JetBrains Mono',Consolas,monospace;
-  font-size:14px;
-  line-height:1.55;
-}
-.wrap{max-width:880px;margin:0 auto;padding:2.5rem 1.25rem 4rem;}
-@media (max-width:600px){.wrap{padding:1.5rem .9rem 3rem;}}
+  <script type="text/babel">
+    function CrystalPalaceFeasibility() {
+      const ownership = [
+        { name: "Woody Johnson", stake: "43%", note: "Acquired ex-Textor stake, Jul 2025, £190M" },
+        { name: "Josh Harris", stake: "10%", note: "Cut from 18% to make room for Johnson" },
+        { name: "David Blitzer", stake: "10%", note: "Cut from 18% to make room for Johnson" },
+        { name: "Steve Parish", stake: "10%", note: "Chairman - retains football control" },
+      ];
 
-.eyebrow{
-  font-size:.68rem;
-  letter-spacing:.14em;
-  text-transform:uppercase;
-  color:var(--ink-soft);
-  display:flex;
-  justify-content:space-between;
-  flex-wrap:wrap;
-  gap:.5rem;
-  margin-bottom:.9rem;
-}
+      const valuationRows = [
+        { label: "Implied club value (Johnson deal)", value: "£400M+", detail: "from £190M / 43%, Jul 2025" },
+        { label: "Forbes valuation", value: "£598M", detail: "$790M, May 2025, global rank #29" },
+        { label: "Squad market value", value: "£475M", detail: "€550M, Transfermarkt, 25/26 squad" },
+        { label: "Revenue (24/25)", value: "£221M", detail: "Forbes, FY2024-25" },
+        { label: "Operating income", value: "£33M", detail: "pre player-trading EBITDA" },
+      ];
 
-.masthead{
-  border:2px solid var(--line);
-  background:var(--card);
-  box-shadow:5px 5px 0 var(--claret);
-  padding:1.6rem 1.5rem;
-  margin-bottom:1.75rem;
-}
-.crest-row{display:flex;align-items:center;gap:.9rem;margin-bottom:.6rem;}
-.crest{
-  width:34px;height:34px;flex:none;
-  background:repeating-linear-gradient(90deg,var(--claret) 0 8px,var(--navy) 8px 16px);
-  border:2px solid var(--line);
-  border-radius:3px;
-}
-h1{
-  font-family:Georgia,'Times New Roman',serif;
-  font-weight:700;
-  font-size:1.7rem;
-  margin:0;
-  letter-spacing:-.01em;
-  text-wrap:balance;
-}
-.sub{font-size:.82rem;color:var(--ink-soft);margin-top:.35rem;}
+      const trackRecord = [
+        { season: "2025-26", tier: "PL", pos: "15th", pts: 45, w: 11, d: 12, l: 15, gd: "-10" },
+        { season: "2024-25", tier: "PL", pos: "12th", pts: 53, w: 13, d: 14, l: 11, gd: "0" },
+        { season: "2023-24", tier: "PL", pos: "10th", pts: 49, w: 13, d: 10, l: 15, gd: "-1" },
+        { season: "2022-23", tier: "PL", pos: "11th", pts: 45, w: "-", d: "-", l: "-", gd: "-" },
+      ];
 
-.verdict-strip{
-  display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.1rem;
-}
-.chip{
-  border:2px solid var(--line);
-  background:var(--paper);
-  padding:.3rem .65rem;
-  font-size:.7rem;
-  letter-spacing:.03em;
-}
-.chip.hot{background:var(--flag);color:var(--flag-ink);border-color:var(--flag-ink);}
+      const riskLog = [
+        { sev: "HIGH", title: "No control available", detail: "Every current owner is embedded, none is a forced or motivated seller. A minority stake buys economics, not decisions - Parish keeps football control regardless of stake size." },
+        { sev: "MED", title: "Multi-club ownership rule exposure", detail: "The mechanism that forced Textor out (UEFA's 2+ club rule) is a standing constraint on any investor already holding stakes elsewhere in Europe." },
+        { sev: "MED", title: "European income downgrade", detail: "Conference League prize pool is a fraction of Europa League's - the FA Cup win that should have been a revenue catalyst nets less than a mid-table PL finish would." },
+        { sev: "LOW", title: "Relegation risk", detail: "15th with -10 GD is worth tracking, but 15 years of unbroken top-flight survival argues this is a bump, not a trend, so far." },
+      ];
 
-section{
-  border:2px solid var(--line);
-  background:var(--card);
-  margin-bottom:1.5rem;
-  box-shadow:4px 4px 0 var(--line);
-}
-.sec-head{
-  border-bottom:2px solid var(--line);
-  background:var(--ink);
-  color:var(--paper);
-  padding:.6rem 1.1rem;
-  font-size:.78rem;
-  font-weight:700;
-  letter-spacing:.05em;
-  display:flex;
-  justify-content:space-between;
-}
-:root[data-theme="dark"] .sec-head{background:var(--ink);color:var(--paper);}
-.sec-body{padding:1.2rem 1.3rem;}
-@media (max-width:600px){.sec-body{padding:1rem;}}
+      const bidMultiples = [
+        { label: "Bid size", value: "₹6,500 Cr", detail: "@ ₹1 = £0.007776 -> £505M" },
+        { label: "Premium vs last transaction", value: "+26.4%", detail: "vs £400M implied, Johnson/Textor deal" },
+        { label: "Discount vs Forbes ceiling", value: "-15.5%", detail: "vs £598M brand-value model" },
+        { label: "P/S multiple", value: "2.29x", detail: "£505M / £221M revenue" },
+        { label: "Ask/Squad multiple", value: "1.06x", detail: "£505M / £475M squad value" },
+      ];
 
-p{margin:.5rem 0;}
-.lede{font-size:.95rem;}
-strong{color:var(--claret-soft);}
+      return (
+        <div className="min-h-screen bg-[#f5f5f5] p-4 md:p-8">
+          <div className="max-w-7xl mx-auto space-y-8">
 
-.stat-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-  gap:.7rem;
-  margin:.9rem 0;
-}
-.stat{
-  border:1px solid var(--ink-soft);
-  padding:.65rem .75rem;
-}
-.stat .k{font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);}
-.stat .v{font-size:1.2rem;font-weight:700;font-variant-numeric:tabular-nums;margin-top:.15rem;}
-.stat .d{font-size:.72rem;color:var(--ink-soft);margin-top:.15rem;}
+            {/* Header */}
+            <div className="border-2 border-black bg-[#FFFF88] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-6 md:p-8">
+              <div className="mb-3 font-['Space_Mono',monospace] opacity-60 text-xs">
+                CONFIDENTIAL_INVESTMENT_THESIS / JULY_2026_DESK_NOTE
+              </div>
+              <h1 className="font-['Space_Mono',monospace] font-bold text-2xl md:text-3xl mb-3">
+                CRYSTAL_PALACE_FC_ACQUISITION
+              </h1>
+              <div className="font-['Space_Mono',monospace] text-sm md:text-base mb-4">
+                SINGLE_ASSET_FEASIBILITY_&_BID_STRESS_TEST
+              </div>
+              <div className="flex gap-3 flex-wrap text-xs">
+                <div className="border-2 border-black bg-white px-3 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                  <span className="font-['Space_Mono',monospace]">PREMIER_LEAGUE</span>
+                </div>
+                <div className="border-2 border-black bg-white px-3 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                  <span className="font-['Space_Mono',monospace]">NO_FULL_CLUB_SALE_ON_MARKET</span>
+                </div>
+                <div className="border-2 border-black bg-black text-white px-3 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                  <span className="font-['Space_Mono',monospace]">VERDICT: PASS</span>
+                </div>
+              </div>
+            </div>
 
-table{width:100%;border-collapse:collapse;font-size:.82rem;}
-.table-scroll{overflow-x:auto;}
-th,td{
-  text-align:left;
-  padding:.45rem .6rem;
-  border-bottom:1px solid var(--ink-soft);
-  white-space:nowrap;
-  font-variant-numeric:tabular-nums;
-}
-th{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);border-bottom:2px solid var(--line);}
-tr:last-child td{border-bottom:none;}
+            {/* Executive Summary */}
+            <div className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="border-b-2 border-black bg-black text-white px-4 md:px-6 py-3">
+                <h2 className="font-['Space_Mono',monospace] font-bold text-sm md:text-base">
+                  [ 01 ] EXECUTIVE_SUMMARY
+                </h2>
+              </div>
+              <div className="p-4 md:p-6 space-y-3 font-['Space_Mono',monospace] text-xs md:text-sm leading-relaxed">
+                <p>
+                  <strong>Crystal Palace is not for sale.</strong> The last transaction was a stake transfer, not a takeover: in July 2025, Woody Johnson completed purchase of John Textor / Eagle Football's 43% shareholding for <strong>£190M</strong>, implying a whole-club value north of <strong>£400M</strong>. Steve Parish, Josh Harris, and David Blitzer stayed in as partners with no signal any intend to sell control.
+                </p>
+                <p>
+                  The Textor exit was forced, not opportunistic - Eagle Football's dual ownership of Palace and Lyon breached UEFA's multi-club rule, costing Palace their Europa League spot (won via first-ever FA Cup) in favour of the Conference League. Selling the stake was the compliance fix, not a market signal.
+                </p>
+                <p className="pt-2 border-t border-gray-200 text-xs opacity-70">
+                  Market Context: Ask/Squad healthy range 0.9-1.2x | Championship P/S median 2.5x | Only realistic entry today is a passive minority stake, not control
+                </p>
+              </div>
+            </div>
 
-.owner-bar{display:flex;height:26px;border:1px solid var(--line);overflow:hidden;margin:.7rem 0;}
-.owner-seg{display:flex;align-items:center;justify-content:center;font-size:.65rem;color:#fff;font-weight:700;}
-.legend{display:flex;gap:1rem;flex-wrap:wrap;font-size:.72rem;color:var(--ink-soft);margin-bottom:.3rem;}
-.legend span{display:inline-flex;align-items:center;gap:.35rem;}
-.dot{width:9px;height:9px;display:inline-block;border-radius:2px;}
+            {/* Ownership */}
+            <div className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="border-b-2 border-black bg-black text-white px-4 md:px-6 py-3">
+                <h2 className="font-['Space_Mono',monospace] font-bold text-sm md:text-base">
+                  [ 02 ] OWNERSHIP_STRUCTURE
+                </h2>
+              </div>
+              <div className="p-4 md:p-6 space-y-3">
+                {ownership.map((o, index) => (
+                  <div key={index} className="border-2 border-black bg-white p-3 md:p-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex justify-between items-center gap-3 flex-wrap">
+                    <div>
+                      <div className="font-['Space_Mono',monospace] font-bold text-sm">{o.name}</div>
+                      <div className="font-['Space_Mono',monospace] text-xs opacity-70">{o.note}</div>
+                    </div>
+                    <div className="border-2 border-black bg-[#FFFF88] px-3 py-1 text-xs">
+                      <span className="font-['Space_Mono',monospace] font-bold">{o.stake}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-.callout{
-  background:var(--flag);
-  color:var(--flag-ink);
-  border-left:4px solid var(--flag-ink);
-  padding:.7rem .9rem;
-  font-size:.8rem;
-  margin:.8rem 0;
-}
+            {/* Valuation Dataset */}
+            <div className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="border-b-2 border-black bg-black text-white px-4 md:px-6 py-3">
+                <h2 className="font-['Space_Mono',monospace] font-bold text-sm md:text-base">
+                  [ 03 ] VALUATION_DATASET
+                </h2>
+              </div>
+              <div className="p-4 md:p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {valuationRows.map((v, index) => (
+                    <div key={index} className="border-2 border-black bg-white p-3 md:p-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                      <div className="font-['Space_Mono',monospace] text-xs opacity-70 mb-1">{v.label}</div>
+                      <div className="font-['Space_Mono',monospace] font-bold text-lg">{v.value}</div>
+                      <div className="font-['Space_Mono',monospace] text-xs opacity-60 mt-1">{v.detail}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
 
-.risk-row{
-  display:flex;gap:.7rem;
-  padding:.6rem 0;
-  border-bottom:1px solid var(--ink-soft);
-  align-items:flex-start;
-}
-.risk-row:last-child{border-bottom:none;}
-.sev{
-  flex:none;width:64px;
-  font-size:.65rem;font-weight:700;letter-spacing:.05em;
-  padding:.15rem .4rem;
-  border:1px solid var(--line);
-  text-align:center;
-  height:fit-content;
-}
-.sev.high{background:var(--bad);color:#fff;border-color:var(--bad);}
-.sev.med{background:var(--flag);color:var(--flag-ink);border-color:var(--flag-ink);}
-.sev.low{background:var(--good);color:#fff;border-color:var(--good);}
-.risk-body b{display:block;font-size:.83rem;margin-bottom:.15rem;}
-.risk-body span{font-size:.78rem;color:var(--ink-soft);}
+            {/* Track Record */}
+            <div className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="border-b-2 border-black bg-black text-white px-4 md:px-6 py-3">
+                <h2 className="font-['Space_Mono',monospace] font-bold text-sm md:text-base">
+                  [ 04 ] ON_FIELD_TRACK_RECORD <span className="opacity-60 font-normal">// ESPN, 25 seasons tracked</span>
+                </h2>
+              </div>
+              <div className="p-4 md:p-6 overflow-x-auto">
+                <table className="w-full text-xs font-['Space_Mono',monospace] min-w-[500px]">
+                  <thead>
+                    <tr className="border-b-2 border-black">
+                      <th className="text-left py-2 opacity-60">SEASON</th>
+                      <th className="text-left py-2 opacity-60">TIER</th>
+                      <th className="text-left py-2 opacity-60">POS</th>
+                      <th className="text-left py-2 opacity-60">PTS</th>
+                      <th className="text-left py-2 opacity-60">W</th>
+                      <th className="text-left py-2 opacity-60">D</th>
+                      <th className="text-left py-2 opacity-60">L</th>
+                      <th className="text-left py-2 opacity-60">GD</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {trackRecord.map((r, index) => (
+                      <tr key={index} className="border-b border-gray-200">
+                        <td className="py-2 font-bold">{r.season}</td>
+                        <td className="py-2">{r.tier}</td>
+                        <td className="py-2">{r.pos}</td>
+                        <td className="py-2">{r.pts}</td>
+                        <td className="py-2">{r.w}</td>
+                        <td className="py-2">{r.d}</td>
+                        <td className="py-2">{r.l}</td>
+                        <td className="py-2">{r.gd}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="font-['Space_Mono',monospace] text-xs opacity-70 mt-3 leading-relaxed">
+                  Matrix score <strong>4.71/10</strong> composite (consistency 1.78, longevity 2.0, peak 0, recent-form 0.93). 15 of 25 tracked seasons in the top flight, zero relegations to League One, zero domestic titles pre-2025, zero Champions League appearances. 2025-26 points (45) down from 53 the year before - mild drift, not collapse, but worth watching against any premium price tag.
+                </div>
+              </div>
+            </div>
 
-.final-verdict{
-  background:var(--navy);
-  color:#fff;
-  border:2px solid var(--line);
-  box-shadow:4px 4px 0 var(--claret);
-  padding:1.4rem 1.4rem 1.6rem;
-}
-.final-verdict .sec-head{background:transparent;border-bottom:2px solid rgba(255,255,255,.3);color:#fff;padding:0 0 .6rem;margin-bottom:1rem;}
-.final-verdict p{opacity:.92;}
-.final-verdict strong{color:var(--flag);}
+            {/* Bid Critique - THE ASK */}
+            <div className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="border-b-2 border-black bg-[#FFFF88] px-4 md:px-6 py-3">
+                <h2 className="font-['Space_Mono',monospace] font-bold text-sm md:text-base">
+                  [ 05 ] BID_STRESS_TEST: ₹6,500_CR_PROPOSAL
+                </h2>
+              </div>
+              <div className="p-4 md:p-6 space-y-4">
+                <div className="font-['Space_Mono',monospace] text-xs md:text-sm leading-relaxed opacity-80">
+                  ₹6,500 Cr (₹65,000,000,000) at spot INR/GBP converts to <strong>~£505M</strong>. Stress-tested against the only real market data point Palace has produced - the Johnson/Textor stake transfer - and against Forbes' brand-value ceiling.
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {bidMultiples.map((b, index) => (
+                    <div key={index} className="border-2 border-black bg-white p-3 md:p-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                      <div className="font-['Space_Mono',monospace] text-xs opacity-70 mb-1">{b.label}</div>
+                      <div className="font-['Space_Mono',monospace] font-bold text-lg">{b.value}</div>
+                      <div className="font-['Space_Mono',monospace] text-xs opacity-60 mt-1">{b.detail}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="font-['Space_Mono',monospace] text-xs bg-gray-50 p-3 border-l-4 border-black leading-relaxed">
+                  <strong>CRITIQUE:</strong> ₹6,500 Cr / £505M pays a 26% premium over the last arm's-length price (£400M, Jul 2025) for an asset with no willing seller and no control on offer. Ask/Squad lands at 1.06x - inside the "healthy" 0.9-1.2x band on paper, but that band prices a normal transaction, not an unsolicited premium bid into a locked cap table. P/S of 2.29x sits below Forbes' implied 2.71x, meaning the bid is generous by transaction standards but still a "discount" only against a valuation model nobody has actually paid. Paying above the last real trade, for a passive stake, into a club whose points total just fell 53→45 and whose European prize pool just got demoted to Conference League tier, has no natural buyer logic behind it - the premium exists only because the bid, not the market, invented it.
+                </div>
+                <div className="font-['Space_Mono',monospace] text-xs bg-black text-white p-3 border-l-4 border-[#FFFF88] leading-relaxed">
+                  <strong>VERDICT:</strong> REJECT at ₹6,500 Cr. If capital must land on Palace, anchor any offer to the £400M transaction basis (~₹5,150 Cr), not above it, and only as a passive minority stake if Harris, Blitzer, or Parish ever trim further. Otherwise redeploy toward the EFL-tier distressed and asymmetric plays already flagged in the wider dataset.
+                </div>
+              </div>
+            </div>
 
-.sources{font-size:.7rem;color:var(--ink-soft);border-top:1px solid var(--ink-soft);padding-top:.8rem;margin-top:.8rem;}
-.sources a{color:var(--ink-soft);}
-a{color:var(--claret-soft);}
-</style>
+            {/* Risk Log */}
+            <div className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="border-b-2 border-black bg-black text-white px-4 md:px-6 py-3">
+                <h2 className="font-['Space_Mono',monospace] font-bold text-sm md:text-base">
+                  [ 06 ] RISK_LOG
+                </h2>
+              </div>
+              <div className="p-4 md:p-6 space-y-2">
+                {riskLog.map((r, index) => (
+                  <div key={index} className="border-2 border-black bg-white p-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex gap-3 flex-wrap items-start">
+                    <div className={
+                      "border-2 border-black px-2 py-1 text-xs font-bold shrink-0 " +
+                      (r.sev === "HIGH" ? "bg-black text-white" : r.sev === "MED" ? "bg-[#FFFF88]" : "bg-white")
+                    }>
+                      {r.sev}
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-['Space_Mono',monospace] font-bold text-xs md:text-sm mb-1">{r.title}</div>
+                      <div className="font-['Space_Mono',monospace] text-xs opacity-70">{r.detail}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-<div class="wrap">
+            {/* Sources */}
+            <div className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-4 md:p-6">
+              <div className="font-['Space_Mono',monospace] text-xs opacity-60 leading-relaxed">
+                Data Sources: ESPN (live team-history pull, this desk's tool), Transfermarkt (squad values), Forbes Soccer Team Valuations (May 2025), BBC Sport (Johnson/Textor transaction reporting), We Are Palace (ownership register). FX: spot INR/GBP, July 2026.
+              </div>
+            </div>
 
-  <div class="eyebrow">
-    <span>CONFIDENTIAL — SINGLE-ASSET FEASIBILITY REVIEW</span>
-    <span>JULY 2026 DESK NOTE</span>
-  </div>
+          </div>
+        </div>
+      );
+    }
 
-  <div class="masthead">
-    <div class="crest-row">
-      <div class="crest" aria-hidden="true"></div>
-      <div>
-        <h1>Crystal Palace FC — Investment Feasibility</h1>
-        <div class="sub">Premier League, Selhurst Park, London SE25 · Data via live ESPN pull + Transfermarkt/Forbes market data, cross-checked July 2026</div>
-      </div>
-    </div>
-    <div class="verdict-strip">
-      <div class="chip hot">VERDICT: FAIRLY PRICED, NOT DISTRESSED</div>
-      <div class="chip">NO FULL-CLUB SALE ON MARKET</div>
-      <div class="chip">ENTRY = MINORITY STAKE ONLY</div>
-    </div>
-  </div>
-
-  <section>
-    <div class="sec-head"><span>[ 01 ] SITUATION</span></div>
-    <div class="sec-body">
-      <p class="lede">Palace is <strong>not for sale as a club</strong>. The last transaction was a stake transfer, not a takeover: in July 2025, Woody Johnson (NY Jets owner) completed purchase of John Textor/Eagle Football's 43% shareholding for <strong>£190M</strong>, implying a whole-club value north of <strong>£400M</strong>. Steve Parish, Josh Harris and David Blitzer stayed in as partners. There is no indication any of the four current owners intend to sell control.</p>
-      <p>The Textor exit wasn't opportunistic — it was forced. Eagle Football also controlled Lyon, breaching UEFA's multi-club ownership rule. That conflict cost Palace their spot in the 2025-26 Europa League (won via FA Cup, their first major trophy) — they were demoted to the Conference League instead. Selling the stake was the compliance fix.</p>
-      <div class="callout"><strong>Read-through:</strong> the only realistic entry point today is a future minority stake, either if Harris/Blitzer trim further or Parish eventually monetizes his holding. There is no distressed-asset or forced-sale angle here — this is a stable, well-run club with an engaged ownership bloc.</div>
-    </div>
-  </section>
-
-  <section>
-    <div class="sec-head"><span>[ 02 ] OWNERSHIP STRUCTURE</span></div>
-    <div class="sec-body">
-      <div class="legend">
-        <span><span class="dot" style="background:var(--claret)"></span>Woody Johnson 43%</span>
-        <span><span class="dot" style="background:var(--navy)"></span>Josh Harris 10%</span>
-        <span><span class="dot" style="background:var(--ink-soft)"></span>David Blitzer 10%</span>
-        <span><span class="dot" style="background:var(--flag-ink)"></span>Steve Parish 10% (Chairman, football control)</span>
-        <span><span class="dot" style="background:#8a8a8a"></span>Other / free float ~27%</span>
-      </div>
-      <div class="owner-bar">
-        <div class="owner-seg" style="width:43%;background:var(--claret)">43%</div>
-        <div class="owner-seg" style="width:10%;background:var(--navy)">10</div>
-        <div class="owner-seg" style="width:10%;background:var(--ink-soft)">10</div>
-        <div class="owner-seg" style="width:10%;background:var(--flag-ink);color:var(--flag)">10</div>
-        <div class="owner-seg" style="width:27%;background:#8a8a8a;color:#222">27</div>
-      </div>
-      <p>Prior structure (through 2024-25): Textor 45% / Harris 18% / Blitzer 18% / Parish 10%. Harris and Blitzer both cut their stakes in half to make room for Johnson — a sign of an orderly, negotiated rebalancing rather than distress selling.</p>
-    </div>
-  </section>
-
-  <section>
-    <div class="sec-head"><span>[ 03 ] VALUATION vs. LAST TRANSACTION</span></div>
-    <div class="sec-body">
-      <div class="stat-grid">
-        <div class="stat"><div class="k">Implied club value (Johnson deal)</div><div class="v">£400M+</div><div class="d">from £190M / 43%, Jul 2025</div></div>
-        <div class="stat"><div class="k">Forbes valuation</div><div class="v">£598M</div><div class="d">$790M, May 2025, rank #29 globally</div></div>
-        <div class="stat"><div class="k">Squad market value</div><div class="v">€550M</div><div class="d">≈£475M, Transfermarkt, 25/26 squad</div></div>
-        <div class="stat"><div class="k">Revenue (24/25)</div><div class="v">£221M</div><div class="d">Forbes, FY2024-25</div></div>
-        <div class="stat"><div class="k">Operating income</div><div class="v">£33M</div><div class="d">pre player-trading EBITDA</div></div>
-      </div>
-      <p>Using the transaction-implied £400M as the working ask: <strong>P/S ≈ 1.81x</strong>, <strong>Ask/Squad ≈ 0.84x</strong>. Both sit inside or below the healthy Championship/PL comp band this desk has used elsewhere (0.9–1.2x Ask/Squad). Palace is priced roughly in line with its playing assets — no embedded discount, but no premium either. Forbes' £598M mark is a brand/media-rights model, not a transacted price — treat it as a ceiling, not a floor.</p>
-    </div>
-  </section>
-
-  <section>
-    <div class="sec-head"><span>[ 04 ] ON-FIELD TRACK RECORD <span style="opacity:.6;font-weight:400">ESPN, 25 seasons tracked</span></span></div>
-    <div class="sec-body">
-      <div class="table-scroll">
-      <table>
-        <thead><tr><th>Season</th><th>Tier</th><th>Pos</th><th>Pts</th><th>W</th><th>D</th><th>L</th><th>GD</th></tr></thead>
-        <tbody>
-          <tr><td>2025-26</td><td>PL</td><td>15th</td><td>45</td><td>11</td><td>12</td><td>15</td><td>-10</td></tr>
-          <tr><td>2024-25</td><td>PL</td><td>12th</td><td>53</td><td>13</td><td>14</td><td>11</td><td>0</td></tr>
-          <tr><td>2023-24</td><td>PL</td><td>10th</td><td>49</td><td>13</td><td>10</td><td>15</td><td>-1</td></tr>
-          <tr><td>2022-23</td><td>PL</td><td>11th</td><td>45</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-        </tbody>
-      </table>
-      </div>
-      <p>Matrix score <strong>4.71/10</strong> composite (consistency 1.78, longevity 2.0, peak 0, recent-form 0.93). Reading: 15 of 25 tracked seasons in the top flight, zero relegations to League One, zero domestic titles, zero Champions League appearances — a durable, unspectacular top-half PL tenant, never a genuine title or European-places threat. 2025-26 points total (45) is down from 53 the year before — mild on-pitch drift, not collapse, but worth watching against the £400M+ price tag.</p>
-      <p><span style="color:var(--ink-soft);font-size:.75rem">Historical shape: 2 promotions, 1 relegation across tracked seasons; longest second-tier run 8 seasons before their current 15-year top-flight stay.</span></p>
-    </div>
-  </section>
-
-  <section>
-    <div class="sec-head"><span>[ 05 ] RISK LOG</span></div>
-    <div class="sec-body">
-      <div class="risk-row">
-        <div class="sev high">HIGH</div>
-        <div class="risk-body"><b>No control available</b><span>Every current owner is embedded and none is a forced or motivated seller. A minority stake buys economics, not decisions — Parish keeps football control regardless of your %.</span></div>
-      </div>
-      <div class="risk-row">
-        <div class="sev med">MED</div>
-        <div class="risk-body"><b>Multi-club ownership rule exposure</b><span>The exact mechanism that forced Textor out (UEFA's 2+ club rule) is a standing constraint on any investor who also holds stakes elsewhere in Europe — screen your own portfolio against it before structuring in.</span></div>
-      </div>
-      <div class="risk-row">
-        <div class="sev med">MED</div>
-        <div class="risk-body"><b>European income downgrade</b><span>Conference League prize money and broadcast pool is a fraction of Europa League's — the trophy that should have been a revenue catalyst instead nets less than a mid-table PL finish would.</span></div>
-      </div>
-      <div class="risk-row">
-        <div class="sev low">LOW</div>
-        <div class="risk-body"><b>Relegation risk</b><span>15th with a -10 goal difference is a real number to track, but 15 years of unbroken top-flight survival and a stated matrix score of zero relegations to League One argue this is a bump, not a trend, so far.</span></div>
-      </div>
-    </div>
-  </section>
-
-  <div class="final-verdict">
-    <div class="sec-head">[ 06 ] BOTTOM LINE</div>
-    <p><strong>Pass on primary acquisition — there's nothing to acquire.</strong> Palace has no forced seller, no distressed pricing, and no path to control at any cheque size a private buyer would write today. This is the opposite profile of the desk's Wolves/Preston-style plays: fairly valued, professionally run, ownership-locked.</p>
-    <p>If capital must go into Palace specifically, the only sane structure is a <strong>passive minority position</strong> should Harris, Blitzer, or Parish ever trim further — priced off the £400M Johnson mark, not the £598M Forbes mark. Otherwise, redeploy toward the EFL-tier distressed and asymmetric plays already flagged in the wider dataset.</p>
-  </div>
-
-  <div class="sources">
-    Sources: ESPN (live team-history pull, this desk's tool), <a href="https://www.transfermarkt.us/crystal-palace-fc/kader/verein/873/saison_id/2025">Transfermarkt</a> squad values, <a href="https://www.forbes.com/teams/crystal-palace/">Forbes Soccer Team Valuations</a> (May 2025), <a href="https://feeds.bbci.co.uk/sport/football/articles/clyl2dzyvr4o">BBC Sport</a> on the Johnson/Textor transaction, <a href="https://www.wearepalace.uk/club/owners/">We Are Palace</a> ownership register.
-  </div>
-
-</div>
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<CrystalPalaceFeasibility />);
+  </script>
+</body>
+</html>
